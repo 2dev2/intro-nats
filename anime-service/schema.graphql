@@ -1,0 +1,19 @@
+type Anime {
+  id: ID!
+  title: String!
+  author: String!
+}
+
+type Query {
+  FindAllAnimes(page: Int! size: Int!): [Anime!]!
+  FindAnimeByID(id: ID!): Anime
+}
+
+input InputAnime{
+  title: String!
+  author: String!
+}
+
+type Mutation {
+  CreateAnime(input: InputAnime!): Anime
+}
