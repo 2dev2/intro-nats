@@ -8,12 +8,15 @@ import (
 	"log"
 	"time"
 
+	pb "anime-service/pb"
+
 	"github.com/nats-io/nats.go"
 )
 
 type Resolver struct {
-	animes   map[string]*Anime
-	natsConn *nats.Conn
+	animes              map[string]*Anime
+	natsConn            *nats.Conn
+	searchServiceClient pb.SearchServiceClient
 }
 
 func (r *Resolver) Mutation() MutationResolver {
@@ -23,10 +26,14 @@ func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
 
-func NewResolver(natsConn *nats.Conn) *Resolver {
+func NewResolver(natsConn *nats.Conn, searchServiceClient pb.SearchServiceClient) *Resolver {
+	animes := make(map[string]*Anime)
+	animes["1"] = &Anime{ID: "1", Title: "Boku no Hero Academia", Author: "Kohei Horikoshi"}
+
 	return &Resolver{
-		animes:   make(map[string]*Anime),
-		natsConn: natsConn,
+		animes:              animes,
+		natsConn:            natsConn,
+		searchServiceClient: searchServiceClient,
 	}
 }
 
@@ -56,9 +63,14 @@ type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) FindAllAnimes(ctx context.Context, page int, size int) ([]*Anime, error) {
 	var animes []*Anime
-	if len(r.animes) > 0 {
-		for _, anime := range r.animes {
-			animes = append(animes, anime)
+	response, err := r.searchServiceClient.SearchAnimes(ctx, &pb.SearchRequest{})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if len(response.Animes) > 0 {
+		for _, anime := range response.Animes {
+			animes = append(animes, &Anime{ID: anime.Id, Title: anime.Title, Author: anime.Author})
 		}
 	}
 

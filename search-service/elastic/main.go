@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
+	"time"
 
 	"github.com/olivere/elastic"
 	"github.com/rubiagatra/search-service/elastic/model"
@@ -76,4 +79,39 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("Indexed anime %s to index %s, type %s\n", put1.Id, put1.Index, put1.Type)
+	time.Sleep(500 * time.Millisecond)
+
+	searchResult, err := client.Search().
+		Index("anime").
+		Type("anime").
+		Sort("title", true).
+		From(0).Size(10).
+		Pretty(true).
+		Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Query took %d milliseconds\n", searchResult.TookInMillis)
+
+	var ttanime model.Anime
+	for _, item := range searchResult.Each(reflect.TypeOf(ttanime)) {
+		if a, ok := item.(model.Anime); ok {
+			fmt.Printf("Anime Title %s: Author %s\n", a.Title, a.Author)
+		}
+	}
+	fmt.Printf("Found a total of %d animes\n", searchResult.TotalHits())
+	if searchResult.Hits.TotalHits > 0 {
+		fmt.Printf("Found a total of %d animes \n", searchResult.Hits.TotalHits)
+		for _, hit := range searchResult.Hits.Hits {
+			var a model.Anime
+			err := json.Unmarshal(*hit.Source, &a)
+			if err != nil {
+			}
+			fmt.Printf("Anime Title %s: Author %s\n", a.Title, a.Author)
+		}
+	} else {
+		fmt.Print("Found no animes\n")
+	}
+
 }

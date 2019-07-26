@@ -1,0 +1,21 @@
+syntax="proto3";
+
+message Anime {
+  string id = 1;
+  string title = 2;
+  string author = 3;
+}
+
+message Animes {
+  repeated Anime animes = 1;
+}
+
+message SearchRequest {
+  string query = 1;
+  int32 page = 2;
+  int32 size = 3;
+}
+
+service SearchService {
+  rpc SearchAnimes(SearchRequest) returns (Animes) {}
+}

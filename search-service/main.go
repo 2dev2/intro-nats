@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/olivere/elastic"
 	pb "github.com/rubiagatra/search-service/pb"
 	"github.com/rubiagatra/search-service/service"
 	"google.golang.org/grpc"
@@ -21,8 +22,16 @@ func main() {
 	}
 	defer lis.Close()
 
+	client, err := elastic.NewSimpleClient(elastic.SetURL("http://127.0.0.1:9200"))
+	if err != nil {
+		log.Fatalf("failed to connect elastic: %v", err)
+	}
+
 	grpcServer := grpc.NewServer()
-	pb.RegisterSearchServiceServer(grpcServer, service.NewService())
+	service := service.NewService()
+	service.RegisterElasticClient(client)
+
+	pb.RegisterSearchServiceServer(grpcServer, service)
 	log.Printf("Server grpc running on: %d", port)
 	grpcServer.Serve(lis)
 
