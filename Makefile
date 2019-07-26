@@ -1,10 +1,10 @@
 subscriber:
 	cd search-service/ && go run subscriber/main.go
 
-search-service:
+run-search-service:
 	cd search-service/ && go run main.go
 
-anime-service:
+run-anime-service:
 	cd anime-service/ && go run server/server.go
 
 es-mapping:
