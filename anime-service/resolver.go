@@ -2,15 +2,18 @@ package anime_service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
-	"github.com/labstack/gommon/log"
+	"github.com/nats-io/nats.go"
 )
 
 type Resolver struct {
-	animes map[string]*Anime
+	animes   map[string]*Anime
+	natsConn *nats.Conn
 }
 
 func (r *Resolver) Mutation() MutationResolver {
@@ -20,9 +23,10 @@ func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
 
-func NewResolver() *Resolver {
+func NewResolver(natsConn *nats.Conn) *Resolver {
 	return &Resolver{
-		animes: make(map[string]*Anime),
+		animes:   make(map[string]*Anime),
+		natsConn: natsConn,
 	}
 }
 
@@ -36,6 +40,14 @@ func (r *mutationResolver) CreateAnime(ctx context.Context, input InputAnime) (*
 	}
 
 	r.animes[anime.ID] = anime
+
+	animeJSON, err := json.Marshal(anime)
+	if err != nil {
+		log.Print("something wrong when marshaling JSON")
+		return nil, err
+	}
+
+	go r.natsConn.Publish("anime-service-subject", animeJSON)
 
 	return anime, nil
 }
@@ -55,7 +67,7 @@ func (r *queryResolver) FindAllAnimes(ctx context.Context, page int, size int) (
 func (r *queryResolver) FindAnimeByID(ctx context.Context, id string) (*Anime, error) {
 	if _, ok := r.animes[id]; !ok {
 		err := errors.New("anime not found")
-		log.Error(err)
+		log.Print(err)
 		return nil, err
 	}
 	return r.animes[id], nil
