@@ -79,7 +79,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("Indexed anime %s to index %s, type %s\n", put1.Id, put1.Index, put1.Type)
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 
 	searchResult, err := client.Search().
 		Index("anime").
