@@ -23,13 +23,14 @@ docker run --name -p 4222:4222 nats
 
 ## Try Using Simple Subscriber
 - Run your nats server `docker run --name -p 4222:4222 nats`
-- make run-simple
+- `make run-simple`
 
 ## Try Using anime-service and search-service
 
 ![Demo](static/demo.png)
 
 - Run your nats server `docker run --name -p 4222:4222 nats`
+- `docker network create somenetwork`
 - Run your elasticsearch server `docker run -d --name elasticsearch --net somenetwork -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:6.8.1`
 - `make subscriber`
 - `make run-search-service`
