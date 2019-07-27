@@ -26,13 +26,16 @@ docker run --name -p 4222:4222 nats
 - make run-simple
 
 ## Try Using anime-service and search-service
+
+![Demo](static/demo.png)
+
 - Run your nats server `docker run --name -p 4222:4222 nats`
 - Run your elasticsearch server `docker run -d --name elasticsearch --net somenetwork -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:6.8.1`
-- make subscriber
-- make run-search-service
-- make run-anime-service
-- make es-mapping
-- Try It!
+- `make subscriber`
+- `make run-search-service`
+- `make run-anime-service`
+- `make es-mapping`
+- Try It! on `localhost:8080`
 
 ## TODO:
 - Make docker-compose for easier demo
