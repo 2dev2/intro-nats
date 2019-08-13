@@ -1,5 +1,6 @@
 # An Introduction to NATS
 
+
 ## Try Using Telnet
 You can try it right away using telnet onto demo server.
 
